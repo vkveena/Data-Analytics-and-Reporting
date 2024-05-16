@@ -21,6 +21,7 @@ State_Alias
 - Excel - Visualizing and Data Cleaning CSV Files
 - MySQL - To perform Exploratory Data Analysis
 - Tableau - Create Dashboard and Reports - 1 Story – 7 Dashboards tabs – 13 Worksheets
+- Python - To include Revenue and profit percentage
 
 ### Data Cleaning / Preparation
 
@@ -31,6 +32,8 @@ In Initial Data Preparation phase
 - Data Value Unification
 - Expression Transformation
 - Joining 5 different tables to cross-validate Nationwide benchmark status
+- Included random Revenue, Profit generation metrics using Python excluded non-profit from this category
+  [
 
 ### Data Analysis
 - What is the Aging of Facility (Years Established) ? How many established in recent years ?
