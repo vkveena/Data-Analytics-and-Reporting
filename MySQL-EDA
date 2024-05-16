@@ -1,0 +1,58 @@
+# My SQL EDA
+
+-------------------------------------------------------------------------------------------------
+
+Select Count(*) from INP_facility_general_info;
+
+select distinct max(length(CCN)) from INP_facility_general_info;
+
+Select * from ( 
+Select State,count(distinct CCN) as A,count(distinct Facility_Name)  as B
+from INP_facility_general_info group by State
+) as tab where A <> B;
+
+Select Facility_Name, count(CCN)
+from INP_facility_general_info 
+where state in ('TX')
+group by Facility_Name
+having  count(CCN) >1 ;
+
+-- ---------CA-----
+-- --QUEEN OF THE VALLEY HOSPITAL -2
+-- --GOOD SAMARITAN HOSPITAL -2
+
+-- ---------TX
+-- BAYLOR SCOTT & WHITE INSTITUTE FOR REHABILITATION - 3;
+
+select * from INP_facility_general_info where Facility_Name in ("BAYLOR SCOTT & WHITE INSTITUTE FOR REHABILITATION");
+
+-----------------------------------------------------------
+
+select * from INP_facility_general_info ;
+
+Select str_to_date('03/31/1995','%m/%d/%Y')  from dual;
+
+Select Certification_date,A,B, datediff(Cast(A as Date),CAST(B as date)) / 365,floor((datediff(Cast(A as Date),CAST(B as date)) / 365)) as Age from
+(
+select Certification_date,current_date() as A  ,str_to_date(Certification_date,'%m/%d/%Y') as B from INP_facility_general_info
+) as A;
+
+-----------------------------------------------------------------
+Select State,HealthCondition,Agg,sum(Agg) over (partition by State) as total
+from 
+(
+Select State,HealthCondition,sum(NumberOfCasesTreated) as Agg
+from (
+select 
+CCN, FacilityName, AddressLine1, AddressLine2, City, State, ZipCode, CountyName, PhoneNumber, CMSRegion, HealthCondition, Count, Footnote,
+Case
+when Count = 'Less than 11' then 10
+when Count = 'Not Available' then 0
+ELSE Count
+END as NumberOfCasesTreated 
+from INP_facility_Conditions 
+) A 
+group by State,HealthCondition
+) B ;
+
+-----------------------------------------------------------------------
