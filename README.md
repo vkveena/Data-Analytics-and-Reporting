@@ -40,8 +40,8 @@ In Initial Data Preparation phase
 - What are facilities performing worse than National rate ?
 - What is the condition that is treated widely in the Inpatient Rehabilitation Facilities ? 
 
-### Results and Findings
-- Average "For profit" facility seems to be established in recent years [0-4] compared to others average with aging more than 30 years (Most of them are from Texas)
+### Results and Findings [Project Link](https://public.tableau.com/app/profile/veena.pravallika.koka/viz/InpatientRehabilitationFacilityScoreOverview/IRF-Region#1)
+- Average "For profit" facility seems to be established in recent years 0-4 years bucket compared to others average with aging more than 30 years (Most of them are from Texas)
 - Texas and California shows High revenue compared to all other states.
 - The average non-profit seems to be higher aging with > 20 years, whereas the for profit aging average is higher with <20 years aging
 - "Not Available" category - Facility Scores are not available for majority of measures - Clearly idenfity which facility didn't share their details.
