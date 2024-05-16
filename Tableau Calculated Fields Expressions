@@ -1,4 +1,4 @@
-### Calculated Fields
+# Calculated Fields
 
 ## CMS Regions
 Case [CMS Region]
@@ -15,7 +15,7 @@ WHEN 10 THEN "Seattle"
 END
 
 
-##DrillDown regions
+## DrillDown regions
 Case [CMS_Region_States]
 WHEN "Boston" then
 "Connecticut, Maine, Massachusetts, New Hampshire, Rhode Island, Vermont"
@@ -33,27 +33,27 @@ when "Seattle" then "Alaska, Idaho, Oregon, Washington"
 END
 
 
-###Profit Percentage Calculation
+## Profit Percentage Calculation
 IF INT([Profit Percentage]) <> 0 THEN
 ROUND((INT([Profit Percentage])/100)*[Gross Annual Revenue])
 END
 
-###Age Calculation
+## Age Calculation
 FLOOR(DATEDIFF('day',[Certification Date],TODAY()) / 365)
 
 
-###Provider to National Variables - Join Conditions Provider data Sheet
+## Provider to National Variables - Join Conditions Provider data Sheet
 IF NOT ([Score] IN ('No Different than the National Benchmark','No Different than the National Rate','Better than the National Rate','Better than the National Benchmark','Not Available','Worse than the National Rate','Worse than the National Benchmark')) THEN [Measure Code]
 ELSEIF ([Score] IN ('Worse than the National Rate','Worse than the National Benchmark')) THEN (REPLACE([Measure Code],'_COMP_PERF','_N_WORSE'))
 ELSEIF ([Score] IN ('Better than the National Rate','Better than the National Benchmark')) THEN (REPLACE([Measure Code],'_COMP_PERF','_N_BETTER'))
 ELSEIF ([Score] IN ('No Different than the National Rate','No Different than the National Benchmark')) THEN (REPLACE([Measure Code],'_COMP_PERF','_N_NO_DIFF')) 
 END
 
-##National Data sheet
+## National Data sheet
 REPLACE([National_MeasureCode_Identified],'_NATL','')
 
 
-##Facility Score Clean up
+## Facility Score Clean up
 IRF_FacilityScore
 IF NOT([Score] in ( 'No Different than the National Benchmark','No Different than the National Rate','Better than the National Rate','Better than the National Benchmark','Not Available','Worse than the National Rate','Worse than the National Benchmark')) THEN STR([Score])
 ELSEIF ([Score] in ('No Different than the National Benchmark','No Different than the National Rate')) AND (REPLACE([Measure Code],'_COMP_PERF','_N_NO_DIFF_NATL') = [National_MeasureCode_Identified])  THEN STR([Score_NATL])
@@ -62,20 +62,20 @@ ELSEIF ([Score] in ('Better than the National Rate','Better than the National Be
 ELSE '999999'
 END
 
-##Score_Updated
+## Score_Updated
 FLOAT( [IRF_FacilityScore])
 
 
-##National_Score
+## National_Score
 ROUND([Score_NATL],2)
 
-##National Benchmark Status 
+## National Benchmark Status 
 IF ROUND([Score_Updated],2) > ROUND([National_Score],2) THEN 'Better than National Rate'
 ELSEIF ROUND([Score_Updated],2) = ROUND([National_Score],2) THEN 'No Difference than National Rate'
 ELSEIF ROUND([Score_Updated],2) < ROUND([National_Score],2) THEN 'Worse than National Rate'
 END
 
-##Score Category 0-100 points
+## Score Category 0-100 points
 IF [Score_Updated] >= 0 and [Score_Updated] <= 25 then '0-25'
 ELSEIF [Score_Updated] >= 26 and [Score_Updated] <= 50 then '26-50'
 ELSEIF [Score_Updated] >=51 and [Score_Updated] <= 75 then '51-75'
@@ -83,7 +83,7 @@ ELSEIF [Score_Updated] >=76 and [Score_Updated] <= 100 then '76-100'
 END
 
 
-##Facility Category Variable conversion
+## Facility Category Variable conversion
 CASE REGEXP_EXTRACT([Measure Code], '([A-Z]+_[0-9]+_[0-9]+)')
 when 'I_006_01' Then 'Catheter-associated urinary tract infections (CAUTI)'
 when 'I_008_02' Then 'Percentage of patients whose functional abilities were assessed and functional goals were included in their treatment plan'
@@ -105,7 +105,7 @@ END
 
 
  
-###Facility Sub Category Variable conversion 
+## Facility Sub Category Variable conversion 
 Case [Measure Code]
 When 'I_006_01_CI_LOWER' Then 'Standardized infection ratio (SIR) 95% confidence interval - lower limit'
 When 'I_006_01_CI_UPPER' Then 'SIR 95% confidence interval - upper limit'
