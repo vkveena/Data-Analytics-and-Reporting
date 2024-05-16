@@ -1,0 +1,178 @@
+### Calculated Fields
+
+## CMS Regions
+Case [CMS Region]
+WHEN 1 THEN "Boston"
+WHEN 2 THEN "New York"
+WHEN 3 THEN "Philadelphia"
+WHEN 4 THEN "Atlanta"
+WHEN 5 THEN "Chicago"
+WHEN 6 THEN "Dallas"
+WHEN 7 THEN "Kansas City"
+WHEN 8 THEN "Denver"
+WHEN 9 THEN "San Francisco"
+WHEN 10 THEN "Seattle"
+END
+
+
+##DrillDown regions
+Case [CMS_Region_States]
+WHEN "Boston" then
+"Connecticut, Maine, Massachusetts, New Hampshire, Rhode Island, Vermont"
+WHEN "New York" then "New Jersey, New York, Puerto Rico, Virgin Islands"
+When "Philadelphia" then "Delaware, District of Columbia, Maryland, Pennsylvania, Virginia, West Virginia"
+when "Atlanta" then
+"Alabama, Florida, Georgia, Kentucky, Mississippi, North Carolina, South Carolina, Tennessee"
+when "Chicago" then 
+"Illinois, Indiana, Michigan, Minnesota, Ohio, Wisconsin"
+when "Dallas" then "Arkansas, Louisiana, New Mexico, Oklahoma, Texas"
+when "Kansas City" then "Iowa, Kansas, Missouri, Nebraska" 
+when "Denver" then "Colorado, Montana, North Dakota, South Dakota, Utah, Wyoming"
+when "San Francisco" then "Arizona, California, Hawaii, Nevada, Pacific Territories"
+when "Seattle" then "Alaska, Idaho, Oregon, Washington"
+END
+
+
+###Profit Percentage Calculation
+IF INT([Profit Percentage]) <> 0 THEN
+ROUND((INT([Profit Percentage])/100)*[Gross Annual Revenue])
+END
+
+###Age Calculation
+FLOOR(DATEDIFF('day',[Certification Date],TODAY()) / 365)
+
+
+###Provider to National Variables - Join Conditions Provider data Sheet
+IF NOT ([Score] IN ('No Different than the National Benchmark','No Different than the National Rate','Better than the National Rate','Better than the National Benchmark','Not Available','Worse than the National Rate','Worse than the National Benchmark')) THEN [Measure Code]
+ELSEIF ([Score] IN ('Worse than the National Rate','Worse than the National Benchmark')) THEN (REPLACE([Measure Code],'_COMP_PERF','_N_WORSE'))
+ELSEIF ([Score] IN ('Better than the National Rate','Better than the National Benchmark')) THEN (REPLACE([Measure Code],'_COMP_PERF','_N_BETTER'))
+ELSEIF ([Score] IN ('No Different than the National Rate','No Different than the National Benchmark')) THEN (REPLACE([Measure Code],'_COMP_PERF','_N_NO_DIFF')) 
+END
+
+##National Data sheet
+REPLACE([National_MeasureCode_Identified],'_NATL','')
+
+
+##Facility Score Clean up
+IRF_FacilityScore
+IF NOT([Score] in ( 'No Different than the National Benchmark','No Different than the National Rate','Better than the National Rate','Better than the National Benchmark','Not Available','Worse than the National Rate','Worse than the National Benchmark')) THEN STR([Score])
+ELSEIF ([Score] in ('No Different than the National Benchmark','No Different than the National Rate')) AND (REPLACE([Measure Code],'_COMP_PERF','_N_NO_DIFF_NATL') = [National_MeasureCode_Identified])  THEN STR([Score_NATL])
+ELSEIF ([Score] in ('Worse than the National Rate','Worse than the National Benchmark')) AND (REPLACE([Measure Code],'_COMP_PERF','_N_WORSE_NATL') = [National_MeasureCode_Identified])  THEN STR([Score_NATL]-1)
+ELSEIF ([Score] in ('Better than the National Rate','Better than the National Benchmark')) AND (REPLACE([Measure Code],'_COMP_PERF','_N_BETTER_NATL') = [National_MeasureCode_Identified])  THEN STR([Score_NATL]+1)
+ELSE '999999'
+END
+
+##Score_Updated
+FLOAT( [IRF_FacilityScore])
+
+
+##National_Score
+ROUND([Score_NATL],2)
+
+##National Benchmark Status 
+IF ROUND([Score_Updated],2) > ROUND([National_Score],2) THEN 'Better than National Rate'
+ELSEIF ROUND([Score_Updated],2) = ROUND([National_Score],2) THEN 'No Difference than National Rate'
+ELSEIF ROUND([Score_Updated],2) < ROUND([National_Score],2) THEN 'Worse than National Rate'
+END
+
+##Score Category 0-100 points
+IF [Score_Updated] >= 0 and [Score_Updated] <= 25 then '0-25'
+ELSEIF [Score_Updated] >= 26 and [Score_Updated] <= 50 then '26-50'
+ELSEIF [Score_Updated] >=51 and [Score_Updated] <= 75 then '51-75'
+ELSEIF [Score_Updated] >=76 and [Score_Updated] <= 100 then '76-100'
+END
+
+
+##Facility Category Variable conversion
+CASE REGEXP_EXTRACT([Measure Code], '([A-Z]+_[0-9]+_[0-9]+)')
+when 'I_006_01' Then 'Catheter-associated urinary tract infections (CAUTI)'
+when 'I_008_02' Then 'Percentage of patients whose functional abilities were assessed and functional goals were included in their treatment plan'
+when 'I_009_04' then 'Change in patients ability to care for themselves'
+when 'I_010_04' then 'Change in patients ability to move around'
+when 'I_011_04' then 'Percentage of patients who are at or above an expected ability to care for themselves at discharge'
+when 'I_012_04' then 'Percentage of patients who are at or above an expected ability to move around at discharge'
+when 'I_013_01' then 'Percentage of IRF patients who experience one or more falls with major injury during their IRF stay'
+when 'I_015_01' then 'Clostridium difficile Infection (CDI)'
+when 'I_016_01' then 'Influenza vaccination coverage among healthcare personnel'
+when 'I_017_01' then 'Rate of potentially preventable hospital readmissions 30 days after discharge from an IRF'
+when 'I_018_01' then 'Rate of potentially preventable hospital readmissions during the IRF stay'
+when 'I_019_02' then 'Rate of successful return to home or community from an IRF'
+when 'I_020_01' then 'Medicare Spending Per Beneficiary (MSPB) for patients in IRFs'
+when 'I_021_01' then 'Percentage of patients whose medications were reviewed and who received follow-up care when medication issues were identified'
+when 'I_022_01' then 'Percentage of patients with pressure ulcers/pressure injuries that are new or worsened'
+when 'I_023_01' then 'Percentage of IRF healthcare personnel who completed COVID-19 primary vaccination series'
+END
+
+
+ 
+###Facility Sub Category Variable conversion 
+Case [Measure Code]
+When 'I_006_01_CI_LOWER' Then 'Standardized infection ratio (SIR) 95% confidence interval - lower limit'
+When 'I_006_01_CI_UPPER' Then 'SIR 95% confidence interval - upper limit'
+When 'I_006_01_COMP_PERF' Then 'Comparative performance category'
+When 'I_006_01_DOPC_DAYS' Then 'Catheter days'
+When 'I_006_01_ELIGCASES' Then 'Predicted number of infections (B)'
+When 'I_006_01_NUMERATOR' Then 'Number of infections reported (A)'
+When 'I_006_01_SIR' Then 'SIR (A/B)'
+When 'I_008_02_DENOMINATOR' Then 'Denominator'
+When 'I_008_02_NUMERATOR' Then 'Numerator'
+When 'I_008_02_OBS_RATE' Then 'Facility rate'
+When 'I_009_04_ADJ_CHG_SFCR_SCORE' Then 'Average risk-adjusted change score'
+When 'I_009_04_DENOMINATOR' Then 'Denominator'
+When 'I_009_04_OBS_CHG_SFCR_SCORE' Then 'Average observed change score'
+When 'I_010_04_ADJ_CHG_MOBL_SCORE' Then 'Average risk-adjusted change score'
+When 'I_010_04_DENOMINATOR' Then 'Denominator'
+When 'I_010_04_OBS_CHG_MOBL_SCORE' Then 'Average observed change score'
+When 'I_011_04_DENOMINATOR' Then 'Denominator'
+When 'I_011_04_NUMERATOR' Then 'Numerator'
+When 'I_011_04_OBS_RATE' Then 'Facility rate'
+When 'I_012_04_DENOMINATOR' Then 'Denominator'
+When 'I_012_04_NUMERATOR' Then 'Numerator'
+When 'I_012_04_OBS_RATE' Then 'Facility rate'
+When 'I_013_01_DENOMINATOR' Then 'Denominator'
+When 'I_013_01_NUMERATOR' Then 'Numerator'
+When 'I_013_01_OBS_RATE' Then 'Facility rate'
+When 'I_015_01_CI_LOWER' Then 'Standardized infection ratio (SIR) 95% confidence interval - lower limit'
+When 'I_015_01_CI_UPPER' Then 'SIR 95% confidence interval - upper limit'
+When 'I_015_01_COMP_PERF' Then 'Comparative performance category'
+When 'I_015_01_DOPC_DAYS' Then 'Patient days'
+When 'I_015_01_ELIGCASES' Then 'Predicted number of infections (B)'
+When 'I_015_01_NUMERATOR' Then 'Number of infections reported (A)'
+When 'I_015_01_SIR' Then 'SIR (A/B)'
+When 'I_016_01_DENOMINATOR' Then 'Number of health care workers'
+When 'I_016_01_NUMERATOR' Then 'Number of health care workers vaccinated'
+When 'I_016_01_OBS_RATE' Then 'Rate of flu vaccination'
+When 'I_017_01_PPR_PD_COMP_PERF' Then 'Comparative performance category'
+When 'I_017_01_PPR_PD_OBS_RATE' Then 'Unadjusted potentially preventable readmission rate'
+When 'I_017_01_PPR_PD_OBS_READM' Then 'Number of potentially preventable readmissions following discharge'
+When 'I_017_01_PPR_PD_RSRR' Then 'Risk-standardized potentially preventable readmission rate (RSRR)'
+When 'I_017_01_PPR_PD_RSRR_2_5' Then 'Lower limit of the 95% confidence interval on the RSRR'
+When 'I_017_01_PPR_PD_RSRR_97_5' Then 'Upper limit of the 95% confidence interval on the RSRR'
+When 'I_017_01_PPR_PD_VOLUME' Then 'Number of eligible stays'
+When 'I_018_01_PPR_WI_COMP_PERF' Then 'Comparative performance category'
+When 'I_018_01_PPR_WI_OBS_RATE' Then 'Unadjusted potentially preventable readmission rate'
+When 'I_018_01_PPR_WI_OBS_READM' Then 'Number of potentially preventable readmissions'
+When 'I_018_01_PPR_WI_RSRR' Then 'Risk-standardized potentially preventable readmission rate (RSRR)'
+When 'I_018_01_PPR_WI_RSRR_2_5' Then 'Lower limit of the 95% confidence interval on the RSRR'
+When 'I_018_01_PPR_WI_RSRR_97_5' Then 'Upper limit of the 95% confidence interval on the RSRR'
+When 'I_018_01_PPR_WI_VOLUME' Then 'Number of eligible stays'
+When 'I_019_02_DTC_COMP_PERF' Then 'Comparative performance category'
+When 'I_019_02_DTC_NUMBER' Then 'Observed number of discharges to community (DTC)'
+When 'I_019_02_DTC_OBS_RATE' Then 'Observed discharge to community rate'
+When 'I_019_02_DTC_RS_RATE' Then 'Risk-standardized discharge to community rate'
+When 'I_019_02_DTC_RS_RATE_2_5' Then 'Lower limit of the 95% confidence interval on the risk-standardized discharge to community rate'
+When 'I_019_02_DTC_RS_RATE_97_5' Then 'Upper limit of the 95% confidence interval on the risk-standardized discharge to community rate'
+When 'I_019_02_DTC_VOLUME' Then 'Number of eligible stays'
+When 'I_020_01_MSPB_NUMB' Then 'Number of eligible episodes'
+When 'I_020_01_MSPB_SCORE' Then 'MSPB score'
+When 'I_021_01_DENOMINATOR' Then 'Denominator'
+When 'I_021_01_NUMERATOR' Then 'Numerator'
+When 'I_021_01_OBS_RATE' Then 'Facility rate'
+When 'I_022_01_ADJ_RATE' Then 'Facility risk-adjusted rate'
+When 'I_022_01_DENOMINATOR' Then 'Denominator'
+When 'I_022_01_NUMERATOR' Then 'Numerator'
+When 'I_022_01_OBS_RATE' Then 'Facility observed rate'
+When 'I_023_01_DENOMINATOR' Then 'Number of health care workers'
+When 'I_023_01_NUMERATOR' Then 'Number of health care workers vaccinated'
+When 'I_023_01_OBS_RATE' Then 'Rate of COVID-19 vaccination'
+END
